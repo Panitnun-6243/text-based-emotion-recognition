@@ -4,9 +4,9 @@ import streamlit as st
 # Import EDA packages
 import pandas as pd
 import numpy as np
-import sklearn as sk
+# import sklearn as sk
 import altair as alt
-import plotly.express as px
+# import plotly.express as px
 
 # Import utility packages
 import joblib
