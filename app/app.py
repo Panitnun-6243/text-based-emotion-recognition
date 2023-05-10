@@ -4,17 +4,16 @@ import streamlit as st
 # Import EDA packages
 import pandas as pd
 import numpy as np
-# import sklearn as sk
+import sklearn as sk
 import altair as alt
-# import plotly.express as px
+import plotly.express as px
 
 # Import utility packages
 import joblib
-from datetime import datetime
+import time
+import re
 
-# Import track utils
-from track_utils import add_prediction_details, view_all_prediction_details, create_emotionclf_table
-
+# Load model
 pipeline_lr = joblib.load(
     open("models/text_emotion_recog_model_test.pkl", "rb"))
 
@@ -30,64 +29,89 @@ def get_prediction_proba(docx):
     return results
 
 
-# Set minimum emotion list
+# Set emotion list
 emotions_emoji_dict = {"anger": "😠", "disgust": "🤮", "fear": "😨😱", "happy": "🤗",
                        "joy": "😂", "neutral": "😐", "sad": "😔", "sadness": "😔", "shame": "😳", "surprise": "😮"}
 
 # Main Application
+
+
 def main():
     st.title("Text-based Emotion Recognition")
-    menu = ["Playground"]
+    menu = ["Playground", "About"]
     choice = st.sidebar.selectbox("Menu", menu)
-    # Track result
-    create_emotionclf_table()
+
+    # "Playground" page
     if choice == "Playground":
-        st.subheader("Playground")
-        with st.form(key='emotion_clf_form'):
-            raw_text = st.text_area("Classify emotion", placeholder="Type Here...")
+        st.subheader("Playground:dart:")
+        form_placeholder = st.empty()
+
+        # Form
+        with form_placeholder.form(key='emotion_clf_form'):
+            raw_text = st.text_area(
+                "Classify emotion", placeholder="Type Here...")
             submit_text = st.form_submit_button(label='Predict')
 
+        # Submit form
         if submit_text:
-            col1, col2 = st.columns(2)
-            prediction = predict_emotions(raw_text)
-            probability = get_prediction_proba(raw_text)
-            add_prediction_details(raw_text, prediction,
-                                   np.max(probability), datetime.now())
+            if raw_text.strip() != "" and re.search('[a-zA-Z]', raw_text):
+                form_placeholder.empty()
+                with st.spinner("In Progress..."):
+                    time.sleep(1)
 
-            with col1:
-                st.success("Original Text")
-                st.write(raw_text)
-                st.success("Prediction")
-                emoji_icon = emotions_emoji_dict[prediction]
-                st.write("{}:{}".format(prediction, emoji_icon))
-                st.write("Confidence: {}".format(np.max(probability)))
+                    # Perform prediction and obtain results
+                    tab1, tab2 = st.tabs(
+                        ["Prediction Result", "Analysis Result"])
+                    prediction = predict_emotions(raw_text)
+                    probability = get_prediction_proba(raw_text)
 
-            with col2:
-                st.success("Prediction Probability")
-                # st.write(probability)
-                proba_df = pd.DataFrame(
-                    probability, columns=pipeline_lr.classes_)
-                # st.write(proba_df.T)
-                proba_df_clean = proba_df.T.reset_index()
-                proba_df_clean.columns = ["emotions", "probability"]
+                    # Update the content dynamically
+                    with tab1:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.success("Original Text")
+                            st.markdown(
+                                f"<p style='font-size:18px'><strong>{raw_text}</strong></p>", unsafe_allow_html=True)
+                        with col2:
+                            st.success("Emotion on the Text")
+                            emoji_icon = emotions_emoji_dict[prediction]
+                            st.markdown(
+                                f"<p style='font-size:18px'><strong>Emotion</strong>: {prediction} {emoji_icon}</p>", unsafe_allow_html=True)
+                            st.markdown(
+                                f"<p style='font-size:18px'><strong>Confidence</strong>: {format(np.max(probability), '.4f')}</p>", unsafe_allow_html=True)
 
-                fig = alt.Chart(proba_df_clean).mark_bar().encode(
-                    x='emotions', y='probability', color='emotions')
-                st.altair_chart(fig, use_container_width=True)
+                    with tab2:
+                        st.success("Prediction Probability")
+                        # st.write(probability)
+                        proba_df = pd.DataFrame(
+                            probability, columns=pipeline_lr.classes_)
+                        # st.write(proba_df.T)
+                        proba_df_clean = proba_df.T.reset_index()
+                        proba_df_clean.columns = ["emotions", "probability"]
 
-    elif choice == "Evaluation":
-        st.subheader("Evaluate Results")
+                        fig = alt.Chart(proba_df_clean).mark_bar().encode(
+                            x='emotions', y='probability', color='emotions')
+                        st.altair_chart(fig, use_container_width=True)
 
-        with st.expander('Prediction Metrics'):
-            df_emotions = pd.DataFrame(view_all_prediction_details(), columns=[
-                                       'Rawtext', 'Prediction', 'Probability', 'Time_of_Visit'])
-            st.dataframe(df_emotions)
+                # Add button to go back to "Playground" page
+                if st.button("Go back to Playground"):
+                    st.experimental_rerun()
 
-            prediction_count = df_emotions['Prediction'].value_counts(
-            ).rename_axis('Prediction').reset_index(name='Counts')
-            pc = alt.Chart(prediction_count).mark_bar().encode(
-                x='Prediction', y='Counts', color='Prediction')
-            st.altair_chart(pc, use_container_width=True)
+            elif raw_text.strip() == "":
+                # Display warning for empty value submission
+                st.warning("Please enter a text before submitting.")
+            else:
+                # Display warning for non-English alphabet characters
+                st.warning(
+                    "Please enter at least one English alphabet character.")
+
+    # "About the Project" page
+    else:
+        st.subheader("About the Project:pushpin:")
+        st.success("*Welcome to our Text Emotion Recognition project!*:smile: Our goal is to build a machine learning model that can accurately classify the emotions expressed in written text.")
+        st.info("By analyzing	:brain: the emotional content of text messages, we aim to provide valuable insights into the user's feelings and emotions. Our project utilizes the GoEmotions dataset, which offers a diverse range of fine-grained emotions, allowing us to capture the nuances of emotional expression. Through advanced natural language processing techniques and state-of-the-art models, we extract meaningful features from the text and apply a deep learning approach for robust emotion classification. Our user-friendly web application provides a seamless experience, empowering users to understand and interpret the emotions conveyed in their text messages. Join us on this exciting journey as we unravel the emotions behind the words!")
+        st.markdown(
+            'You can find the project source code on this link: https://github.com/Panitnun-6243/text_based_emotion_recognition')
 
 
 if __name__ == '__main__':
