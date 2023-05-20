@@ -13,7 +13,7 @@ import re
 
 # Load model
 classifier = pipeline("text-classification",
-                      model="./models/distilbert-base-uncased-finetuned-emotion")
+                      model="distilbert-base-uncased-finetuned-emotion")
 
 # Config app
 def set_page_default():
