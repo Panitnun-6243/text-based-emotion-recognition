@@ -121,15 +121,15 @@ def main():
                     with tab1:
                         col1, col2 = st.columns(2)
                         with col1:
+                            st.success("Emotion on Text")
+                            st.markdown(f"<div style='border: 2px solid #CAF9D7; border-radius: 10px; text-align: center; display:flex; flex-direction:column; padding:12px; text-transform: capitalize;'>"
+                                        f"<div style='font-size:30px;'>{predicted_label}<span style='font-size:22px;'>{emoji_icon}</span></div>"
+                                        f"<div style='font-size:16px; color: #666;'>Confidence Score: {format(prediction['score'], '.4f')}</div>"
+                                        f"</div>", unsafe_allow_html=True)
+                        with col2:
                             st.info("Original Text")
                             st.markdown(
                                 f"<p style='font-size:18px'>&nbsp<strong>{raw_text}</strong></p>", unsafe_allow_html=True)
-                        with col2:
-                            st.success("Emotion on the Text")
-                            st.markdown(
-                                f"<p style='font-size:18px'>&nbsp<strong>Emotion</strong>: {predicted_label} {emoji_icon}</p>", unsafe_allow_html=True)
-                            st.markdown(
-                                f"<p style='font-size:18px'>&nbsp<strong>Confidence</strong>: {format(prediction['score'], '.4f')}</p>", unsafe_allow_html=True)
 
                     with tab2:
                         st.markdown(
@@ -168,6 +168,7 @@ def main():
                                 pie_chart, use_container_width=True)
 
                 # Add button to go back to "Playground" page
+                st.write("") 
                 if st.button("Go back to the form"):
                     st.experimental_rerun()
 
@@ -183,10 +184,12 @@ def main():
     # "About the Project" page
     else:
         st.subheader("About the Project:pushpin:")
-        st.success("*Welcome to our Text Emotion Recognition project!*:smile: Our goal is to build a machine learning model that can accurately classify the emotions expressed in written text.")
-        st.info("By analyzing	:brain: the emotional content of text messages, we aim to provide valuable insights into the user's feelings and emotions. Our project utilizes the GoEmotions dataset, which offers a diverse range of fine-grained emotions, allowing us to capture the nuances of emotional expression. Through advanced natural language processing techniques and state-of-the-art models, we extract meaningful features from the text and apply a deep learning approach for robust emotion classification. Our user-friendly web application provides a seamless experience, empowering users to understand and interpret the emotions conveyed in their text messages. Join us on this exciting journey as we unravel the emotions behind the words!")
+        st.success("**Welcome to our Text Emotion Recognition project!**:smile: My goal is to build a machine learning model that can accurately **classify** the emotions expressed in written text.")
+        st.info("By analyzing the emotional content of text messages, our project offers valuable insights into users' feelings and emotions. Leveraging the **Twitter Emotional Text** dataset, we capture the nuances of emotional expression with fine-grained emotions. Using state-of-the-art **BERT** models and **NLP** techniques, we extract meaningful features and employ deep learning for robust emotion classification.")
         st.markdown(
-            'You can find the project source code on this link: https://github.com/Panitnun-6243/text_based_emotion_recognition')
+            '**You can find the project source code on this link**: https://github.com/Panitnun-6243/text_based_emotion_recognition')
+        st.markdown(
+            '**Dataset**: https://www.kaggle.com/datasets/parulpandey/emotion-dataset')
 
 
 if __name__ == '__main__':
